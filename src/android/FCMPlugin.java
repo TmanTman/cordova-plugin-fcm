@@ -15,19 +15,27 @@ import android.os.Bundle;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.iid.FirebaseInstanceId;
 
+import android.content.Intent;
+import android.media.RingtoneManager;
+import android.app.PendingIntent;
+import android.support.v4.app.NotificationCompat;
+import android.app.NotificationManager;
+import android.content.Context;
+
 import java.util.Map;
+import java.util.HashMap;
 
 public class FCMPlugin extends CordovaPlugin {
- 
+
 	private static final String TAG = "FCMPlugin";
-	
+
 	public static CordovaWebView gWebView;
 	public static String notificationCallBack = "FCMPlugin.onNotificationReceived";
 	public static Boolean notificationCallBackReady = false;
 	public static Map<String, Object> lastPush = null;
-	 
+
 	public FCMPlugin() {}
-	
+
 	public void initialize(CordovaInterface cordova, CordovaWebView webView) {
 		super.initialize(cordova, webView);
 		gWebView = webView;
@@ -35,11 +43,11 @@ public class FCMPlugin extends CordovaPlugin {
 		FirebaseMessaging.getInstance().subscribeToTopic("android");
 		FirebaseMessaging.getInstance().subscribeToTopic("all");
 	}
-	 
+
 	public boolean execute(final String action, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
 
 		Log.d(TAG,"==> FCMPlugin execute: "+ action);
-		
+
 		try{
 			// READY //
 			if (action.equals("ready")) {
@@ -96,6 +104,11 @@ public class FCMPlugin extends CordovaPlugin {
 					}
 				});
 			}
+			// Local Notification //
+			else if (action.equals("localNotification")) {
+				Map<String, Object> data = new HashMap<String, Object>();
+				sendNotification('TestTitle', 'TestBody', data);
+			}
 			else{
 				callbackContext.error("Method not found");
 				return false;
@@ -105,13 +118,13 @@ public class FCMPlugin extends CordovaPlugin {
 			callbackContext.error(e.getMessage());
 			return false;
 		}
-		
+
 		//cordova.getThreadPool().execute(new Runnable() {
 		//	public void run() {
 		//	  //
 		//	}
 		//});
-		
+
 		//cordova.getActivity().runOnUiThread(new Runnable() {
         //    public void run() {
         //      //
@@ -119,7 +132,7 @@ public class FCMPlugin extends CordovaPlugin {
         //});
 		return true;
 	}
-	
+
 	public static void sendPushPayload(Map<String, Object> payload) {
 		Log.d(TAG, "==> FCMPlugin sendPushPayload");
 		Log.d(TAG, "\tnotificationCallBackReady: " + notificationCallBackReady);
@@ -143,4 +156,29 @@ public class FCMPlugin extends CordovaPlugin {
 			lastPush = payload;
 		}
 	}
-} 
+
+//sendNotification(remoteMessage.getNotification().getTitle(), remoteMessage.getNotification().getBody(), remoteMessage.getData());
+    private void sendNotification(String title, String messageBody, Map<String, Object> data) {
+        Intent intent = new Intent(this, FCMPluginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		for (String key : data.keySet()) {
+			intent.putExtra(key, data.get(key).toString());
+		}
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
+                PendingIntent.FLAG_ONE_SHOT);
+
+        Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
+                .setSmallIcon(getApplicationInfo().icon)
+                .setContentTitle(title)
+                .setContentText(messageBody)
+                .setAutoCancel(true)
+                .setSound(defaultSoundUri)
+                .setContentIntent(pendingIntent);
+
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+    }
+}
