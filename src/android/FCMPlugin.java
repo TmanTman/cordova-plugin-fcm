@@ -21,6 +21,7 @@ import android.app.PendingIntent;
 import android.support.v4.app.NotificationCompat;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.net.Uri;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -107,7 +108,7 @@ public class FCMPlugin extends CordovaPlugin {
 			// Local Notification //
 			else if (action.equals("localNotification")) {
 				Map<String, Object> data = new HashMap<String, Object>();
-				sendNotification('TestTitle', 'TestBody', data);
+				sendNotification("TestTitle", "TestBody", data);
 			}
 			else{
 				callbackContext.error("Method not found");
@@ -159,17 +160,18 @@ public class FCMPlugin extends CordovaPlugin {
 
 //sendNotification(remoteMessage.getNotification().getTitle(), remoteMessage.getNotification().getBody(), remoteMessage.getData());
     private void sendNotification(String title, String messageBody, Map<String, Object> data) {
-        Intent intent = new Intent(this, FCMPluginActivity.class);
+		Context context = this.cordova.getActivity().getApplicationContext();
+        Intent intent = new Intent(context, FCMPluginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		for (String key : data.keySet()) {
 			intent.putExtra(key, data.get(key).toString());
 		}
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
         Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(getApplicationInfo().icon)
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
+                .setSmallIcon(context.getApplicationInfo().icon)
                 .setContentTitle(title)
                 .setContentText(messageBody)
                 .setAutoCancel(true)
@@ -177,7 +179,7 @@ public class FCMPlugin extends CordovaPlugin {
                 .setContentIntent(pendingIntent);
 
         NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
     }
