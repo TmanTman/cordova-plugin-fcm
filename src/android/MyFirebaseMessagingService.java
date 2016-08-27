@@ -35,10 +35,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         // message, here is where that should be initiated. See sendNotification method below.
         Log.d(TAG, "==> MyFirebaseMessagingService onMessageReceived");
 
-		if( remoteMessage.getNotification() != null){
-			Log.d(TAG, "\tNotification Title: " + remoteMessage.getNotification().getTitle());
-			Log.d(TAG, "\tNotification Message: " + remoteMessage.getNotification().getBody());
-		}
+        if( remoteMessage.getNotification() != null){
+            Log.d(TAG, "\tNotification Title: " + remoteMessage.getNotification().getTitle());
+            Log.d(TAG, "\tNotification Message: " + remoteMessage.getNotification().getBody());
+        }
 
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("wasTapped", false);

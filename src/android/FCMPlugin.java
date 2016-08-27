@@ -108,7 +108,7 @@ public class FCMPlugin extends CordovaPlugin {
 			// Local Notification //
 			else if (action.equals("localNotification")) {
 				Map<String, Object> data = new HashMap<String, Object>();
-				sendNotification("TestTitle", "TestBody", data);
+				sendNotification("Scryo", "New Message", data);
 			}
 			else{
 				callbackContext.error("Method not found");
