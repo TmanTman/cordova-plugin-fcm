@@ -31,7 +31,7 @@ FCMPlugin.prototype.onNotificationReceived = function(payload){
 	console.log(payload)
 }
 // LOCAL NOTIFICATION
-FCMPlugin.prototype.localNotification = function() {
+FCMPlugin.prototype.localNotification = function(success, error) {
 	console.log('Creating local notification');
 	exec(success, error, "FCMPlugin", 'localNotification', []);
 }
